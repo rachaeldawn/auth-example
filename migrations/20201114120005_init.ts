@@ -22,6 +22,9 @@ export async function up(knex: Knex): Promise<void> {
         .notNullable()
         .unique();
 
+      tbl.integer('age', 3);
+      tbl.specificType('name', 'varchar(256)');
+
       tbl.timestamp('created_at')
         .notNullable()
         .defaultTo(knex.fn.now());

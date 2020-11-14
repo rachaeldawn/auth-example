@@ -3,31 +3,26 @@ import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 @Entity({ name: 'users', schema: 'auth' })
 export class UserModel {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  public id: string;
+
+  @Column({ type: 'integer', nullable: true })
+  public age: number | null;
 
   @Column({ type: 'citext', nullable: false })
-  email: string;
+  public email: string;
 
-  @Column({
-    type: 'timestamptz',
-    nullable: false,
-    name: 'created_at',
-  })
-  createdAt: Date;
+  @Column({ type: 'timestamptz', name: 'created_at', nullable: false })
+  public createdAt: Date;
 
-  @Column({
-    type: 'timestamptz',
-    nullable: false,
-    name: 'updated_at',
-  })
-  updatedAt: Date;
+  @Column({ type: 'timestamptz', name: 'updated_at', nullable: false })
+  public updatedAt: Date;
 
-  @Column({
-    type: 'timestamptz',
-    nullable: true,
-    name: 'confirmed_at',
-  })
-  confirmedAt: Date | null = null;
+  @Column({ type: 'varchar', length: 256, nullable: true })
+  public name: string | null;
 
-  password: string
+  @Column({ type: 'timestamptz', name: 'confirmed_at' })
+  public confirmedAt: Date | null;
+
+  @Column({ type: 'varchar', length: 60 })
+  public password: string
 }

@@ -20,6 +20,9 @@
     "preserveConstEnums": true,
     "typeRoots": [ "node_modules/@types" ],
     "lib": [ "esnext", "dom" ],
-    "paths": { }
+    "paths": {
+      "@app/*": [ "./src/*" ],
+      "@test/*": [ "./test/*" ]
+    }
   }
 }

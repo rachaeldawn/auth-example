@@ -34,5 +34,14 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Environment Variables
+
+| Variable | Usage | Description |
+| :------- | :---- | :---------- |
+| FORK_COUNT | How many sub-process forks are created, default = cpu count | Fork for production clustering |
+| USE_FORK | booleans | Whether or not to use the the cluster feature | 
+| PG_URL | a Postgres URI | Example: `postgres://user:password@host:port/db_name` |
+| USE_SSL | boolean | Whether or not to append `ssl=true` to the PG_URL |
+
 ## Code Samples
 
