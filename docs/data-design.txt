@@ -1,0 +1,42 @@
+auth.refresh_tokens
+  id uuid
+  user_id uuid
+  expires_at timestamptz
+  created_at timestamptz
+
+auth.users
+  id uuid
+  name string
+  age int
+  org_id uuid
+
+auth.organizations
+  id uuid
+  name string
+  creator_id uuid
+
+auth.password_resets
+  id uuid
+  created_at timestamptz
+  accepted_at timestamptz
+  token varchar(64)
+  userid uuid
+
+auth.account_confirmations
+  id uuid
+  created_at timestamptz
+  confirmed_at timestamptz
+  token varchar(64)
+  userid uuid
+  email string
+
+auth.email_changes
+  id uuid
+  created_at timestamptz
+  confirmed_at timestamptz
+  token varchar(64)
+  userid uuid
+
+  old_email string
+  new_email string
+
