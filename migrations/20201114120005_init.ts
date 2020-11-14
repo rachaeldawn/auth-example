@@ -18,18 +18,23 @@ export async function up(knex: Knex): Promise<void> {
         .primary()
         .defaultTo(genUUID(knex));
 
-      tbl.specificType('email', 'citext');
+      tbl.specificType('email', 'citext')
+        .notNullable()
+        .unique();
 
       tbl.timestamp('created_at')
+        .notNullable()
         .defaultTo(knex.fn.now());
 
       tbl.timestamp('updated_at')
+        .notNullable()
         .defaultTo(knex.fn.now());
 
       tbl.timestamp('confirmed_at')
-        .defaultTo(knex.fn.now());
+        .nullable();
 
-      tbl.binary('password');
+      tbl.specificType('password', 'varchar(60)')
+        .nullable();
     });
 
   await knex.schema
@@ -39,9 +44,10 @@ export async function up(knex: Knex): Promise<void> {
         .primary()
         .defaultTo(genUUID(knex));
 
-      tbl.timestamp('used_at');
+      tbl.timestamp('used_at').nullable();
 
       tbl.uuid('user_id')
+        .notNullable()
         .references('id')
         .inTable('auth.users')
         .onDelete('CASCADE')
@@ -62,12 +68,13 @@ export async function up(knex: Knex): Promise<void> {
       tbl.timestamp('accepted_at')
         .notNullable();
 
-      tbl.text('token', 'varchar(32)')
+      tbl.specificType('token', 'varchar(32)')
         .notNullable()
         .unique()
         .defaultTo(genToken(knex));
 
       tbl.uuid('user_id')
+        .notNullable()
         .references('id')
         .inTable('auth.users')
         .onDelete('CASCADE')
@@ -84,9 +91,9 @@ export async function up(knex: Knex): Promise<void> {
         .defaultTo(knex.fn.now());
 
       tbl.timestamp('confirmed_at')
-        .notNullable();
+        .nullable();
 
-      tbl.text('token', 'varchar(32)')
+      tbl.specificType('token', 'varchar(32)')
         .notNullable()
         .unique()
         .defaultTo(genToken(knex));
@@ -95,6 +102,7 @@ export async function up(knex: Knex): Promise<void> {
         .notNullable();
 
       tbl.uuid('user_id')
+        .notNullable()
         .references('id')
         .inTable('auth.users')
         .onDelete('CASCADE')
@@ -111,14 +119,15 @@ export async function up(knex: Knex): Promise<void> {
         .defaultTo(knex.fn.now());
 
       tbl.timestamp('confirmed_at')
-        .notNullable();
+        .nullable();
 
-      tbl.text('token', 'varchar(32)')
+      tbl.specificType('token', 'varchar(32)')
         .notNullable()
         .unique()
         .defaultTo(genToken(knex));
 
       tbl.uuid('user_id')
+        .notNullable()
         .references('id')
         .inTable('auth.users')
         .onDelete('CASCADE')
@@ -140,7 +149,7 @@ export async function up(knex: Knex): Promise<void> {
     .createTable('organizations', tbl => {
       tbl.uuid('id').primary().defaultTo(genUUID(knex));
 
-      tbl.text('name', 'varchar(256)')
+      tbl.specificType('name', 'varchar(256)')
         .notNullable()
         .defaultTo('');
 
@@ -163,6 +172,7 @@ export async function up(knex: Knex): Promise<void> {
         .onUpdate('CASCADE');
 
       tbl.uuid('org_id')
+        .notNullable()
         .references('id')
         .inTable('accounts.organizations')
         .onDelete('CASCADE')
