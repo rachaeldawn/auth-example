@@ -162,6 +162,12 @@ export async function up(knex: Knex): Promise<void> {
         .onDelete('CASCADE')
         .onUpdate('CASCADE');
 
+      tbl.uuid('org_id')
+        .references('id')
+        .inTable('accounts.organizations')
+        .onDelete('CASCADE')
+        .onUpdate('CASCADE');
+
       tbl.timestamp('created_at')
         .notNullable()
         .defaultTo(knex.fn.now());

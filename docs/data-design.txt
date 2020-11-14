@@ -35,12 +35,13 @@ auth.email_changes
   old_email string
   new_email string
 
-accounts.users
+auth.users
   id uuid
   name string
   passwords bytea
   age int
   org_id uuid
+  role accounts.roles
 
 accounts.organizations
   id uuid
