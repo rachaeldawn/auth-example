@@ -7,6 +7,7 @@ import { CreateUser } from './types/create-user';
 import { UserModel } from './user.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { IGetUser } from './types/get-user';
 
 @Injectable()
 export class UserService {
@@ -41,4 +42,14 @@ export class UserService {
     return data;
   }
 
+  /**
+   * Get a user by uniquely identifiable information (id or email)
+   */
+  public async getUser({ id, email }: IGetUser): Promise<UserModel | undefined> {
+    const find: Partial<UserModel> = {};
+    if (!!id) find.id = id;
+    if (!!email) find.email = email;
+
+    return this.userRepo.findOne(find);
+  }
 }
