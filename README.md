@@ -1,6 +1,6 @@
 ## Description
 
-A NestJS Rest API with basic Auth as an example and Twitch Stream project
+A NestJS Rest API with basic Auth as an example for developers to study, and potentially as a seed project for those looking to make their own fully-fledged NestJS API
 
 ## Installation
 

@@ -9,6 +9,8 @@ import { CreateOrganization } from '@app/organization/types/create-organization'
 import { UserProvider } from '@test/database/providers/user.provider';
 import { Database } from '@test/database';
 import { OrganizationProvider } from '@test/database/providers/organization.provider';
+import { OrganizationUserProvider } from '@test/database/providers/organization-user.provider';
+import { OrganizationRole } from '@app/organization/types/roles';
 
 describe('OrganizationModule -- OrganizationService', () => {
   let app: INestApplication;
@@ -17,15 +19,17 @@ describe('OrganizationModule -- OrganizationService', () => {
   let db: Database;
   let userProvider: UserProvider;
   let orgProvider: OrganizationProvider;
+  let orgUserProvider: OrganizationUserProvider;
 
   let user: UserModel;
 
   beforeAll(async () => {
-    db = new Database(UserProvider, OrganizationProvider);
+    db = new Database(UserProvider, OrganizationProvider, OrganizationUserProvider);
     await db.connect('OrganizationService E2E Tests')
 
     userProvider = db.getProvider(UserProvider);
     orgProvider = db.getProvider(OrganizationProvider);
+    orgUserProvider = db.getProvider(OrganizationUserProvider)
   });
 
   beforeEach(async () => {
@@ -39,7 +43,9 @@ describe('OrganizationModule -- OrganizationService', () => {
 
     service = moduleFixture.get(OrganizationService);
 
-    user = await userProvider.createOne({ email: 'organization_servicetests@e2e-tests.example.com' })
+    user = await userProvider.createOne({
+      email: 'organization_servicetests@e2e-tests.example.com',
+    });
   });
 
   afterEach(async () => {
@@ -98,6 +104,44 @@ describe('OrganizationModule -- OrganizationService', () => {
       const result = await service.get({ id: organization.id });
       expect(result).toEqual(organization);
     });
+  });
+
+  describe('#addUser', () => {
+    let org: OrganizationModel;
+    let target: UserModel;
+
+    beforeEach(async () => {
+      const email = 'org_service_add_user@e2e-tests.example.com';
+      const targetEmail = 'org_service_add_user_target@e2e-tests.example.com';
+
+      const [ owner, other ] = await userProvider.createMany([ { email }, { email: targetEmail } ]);
+
+      org = await orgProvider.createOne({ creatorId: owner.id });
+      target = other;
+    });
+
+    afterEach(async () => {
+      const ids = [ org.creatorId ];
+      if (!!target?.id) ids.push(target.id);
+
+      await userProvider.delete(ids);
+    });
+
+    for (const role of ['owner', 'user', 'guest'] as OrganizationRole[]) {
+      it('adds the target user to the organization with the guest role', async () => {
+        const arg = { userId: target.id, orgId: org.id, role };
+        const created = await service.addUser(arg);
+        expect(created).toBeDefined();
+        expect(created.role).toEqual(role);
+        expect(created.orgId).toEqual(org.id);
+        expect(created.userId).toEqual(target.id);
+
+        const record = await orgUserProvider.repo.findOne({ userId: target.id, orgId: org.id });
+        expect(record).toBeTruthy();
+        expect(created).toEqual(record);
+      });
+    }
+
 
   });
 });

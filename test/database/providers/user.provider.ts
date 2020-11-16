@@ -12,7 +12,7 @@ import { DatabaseProvider, ProvideModels } from '../provider';
 export interface IOneUser {
   email: string;
   name?: string;
-  confirmed_at?: Date;
+  confirmedAt?: Date;
   age?: number;
   password?: string;
 }
