@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserModel } from './user.model';
+import { UserModel } from './models/user.model';
 import { TypeOrmModule } from '@nestjs/typeorm'
 
 // declare the models once so they can be shared in the situation

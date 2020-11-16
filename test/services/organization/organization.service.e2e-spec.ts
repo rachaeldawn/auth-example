@@ -4,13 +4,13 @@ import { OrganizationService } from '@app/organization/organization.service';
 import { setupDefaultApp } from '@app/app';
 import { INestApplication } from '@nestjs/common';
 import { OrganizationModel } from '@app/organization/models/organization.model';
-import { UserModel } from '@app/user/user.model';
+import { UserModel } from '@app/user/models/user.model';
 import { CreateOrganization } from '@app/organization/types/create-organization';
 import { UserProvider } from '@test/database/providers/user.provider';
 import { Database } from '@test/database';
 import { OrganizationProvider } from '@test/database/providers/organization.provider';
-import { OrganizationUserProvider } from '@test/database/providers/organization-user.provider';
 import { OrganizationRole } from '@app/organization/types/roles';
+import { OrganizationUserProvider } from '@test/database/providers/organization-user.provider';
 
 describe('OrganizationModule -- OrganizationService', () => {
   let app: INestApplication;

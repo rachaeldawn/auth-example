@@ -4,7 +4,7 @@ import * as constants from './user.constants';
 
 import { Injectable } from '@nestjs/common';
 import { CreateUser } from './types/create-user';
-import { UserModel } from './user.model';
+import { UserModel } from './models/user.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IGetUser } from './types/get-user';

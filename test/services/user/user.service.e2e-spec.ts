@@ -3,7 +3,7 @@ import { AppModule } from '@app/app.module';
 import { UserService } from '@app/user/user.service';
 import { setupDefaultApp } from '@app/app';
 import { INestApplication } from '@nestjs/common';
-import { UserModel } from '@app/user/user.model';
+import { UserModel } from '@app/user/models/user.model';
 import { CreateUser } from '@app/user/types/create-user';
 import { Database } from '@test/database';
 import { UserProvider } from '@test/database/providers/user.provider';

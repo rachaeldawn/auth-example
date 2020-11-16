@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 
-import { UserModel } from '@app/user/user.model';
+import { UserModel } from '@app/user/models/user.model';
 import { Repository } from 'typeorm';
 import { hashRounds } from '@app/user/user.constants';
 import { defaultPassword } from '@test/utilities/constants';
