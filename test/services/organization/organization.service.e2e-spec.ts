@@ -68,13 +68,8 @@ describe('OrganizationModule -- OrganizationService', () => {
     });
 
     it('should be able to create organization', async () => {
-      try {
-
       const creation = await service.create(dto, user.id);
       expect(creation).toBeDefined();
-      } catch(err) {
-        console.error('calling service failed because: ', err)
-      }
     });
 
   });
