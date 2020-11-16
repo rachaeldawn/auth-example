@@ -1,0 +1,84 @@
+openapi: '3.0.2'
+info:
+  title: Auth Example
+  version: '1.0'
+servers:
+  - url: https://your-site@your-domain.com/v1
+paths:
+  /register:
+    post:
+      summary: 'Create new accounts'
+      description: |
+        Register a new account, with a new user and organization.
+        Dispatches an email to the email provided to confirm they
+        are not a bot
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registration'
+      responses:
+        '201':
+          description: |
+            User was successfully created. An email was dispatched that the user
+            must respond to so we know they're a real person
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '200':
+          description: |
+            The user has already registered, but not confirmed their account. The
+            email is resent to the address, and the intended password (if different)
+            will be changed to what is provided in this request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: |
+            The user provided a password that failed to be secure enough
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: |
+            The user tried to re-register with an email that already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Registration:
+      properties:
+        email:
+          type: string
+          example: 'you@example.com'
+        password:
+          type: string
+          example: IloveGrandma'sPie101!
+        organization:
+          type: string
+          example: 'yeet mageet'
+      required:
+        - email
+        - password
+    MessageResponse:
+      properties:
+        message:
+          type: string
+          example: 'A user-readable message for toasting'
+    ErrorResponse:
+      properties:
+        message:
+          type: string
+          description: 'A user-readable message for toasting'
+          example: 'Uh-oh! Looks like that password was not long enough!'
+        error:
+          description: |
+            A short-form, parseable error for SDKs to parse and respond to
+          type: string
+          example: 'Incorrect password length, minimum 8 chars.'

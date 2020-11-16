@@ -16,7 +16,7 @@ export class OrganizationService {
 
     @InjectRepository(OrganizationUserModel)
     private readonly orgUserRepo: Repository<OrganizationUserModel>,
-  ) {}
+  ) { }
 
   public async addUser({ userId, orgId, role }: IAddUser): Promise<OrganizationUserModel> {
     const org = await this.get({ id: orgId });

@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AccountsModule } from './accounts/accounts.module';
 import { UserModule } from './user/user.module';
 import { SharedModule } from './shared/shared.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -31,7 +30,6 @@ import { RegistrationModule } from './registration/registration.module';
     }),
 
     // Features
-    AccountsModule,
     UserModule,
     OrganizationModule,
     RegistrationModule,
