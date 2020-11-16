@@ -28,6 +28,7 @@ export class RegistrationController {
       password: body.password,
     });
 
+    await this.users.createConfirmation(user);
     const org = await this.orgs.create({ name: body.organization ?? '' }, user.id);
     await this.orgs.addUser({ userId: user.id, orgId: org.id, role: 'owner' });
 

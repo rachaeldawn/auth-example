@@ -18,7 +18,7 @@ describe('RegistrationController', () => {
 
   beforeEach(async () => {
 
-    userService = createSpyObject(['createUser', 'getUser']);
+    userService = createSpyObject(['createUser', 'getUser', 'createConfirmation']);
     orgService = createSpyObject(['create', 'addUser']);
 
     const module: TestingModule = await Test
@@ -90,6 +90,12 @@ describe('RegistrationController', () => {
 
       expect(orgService.create).toHaveBeenCalledWith(orgCall, createdUser.id);
       expect(orgService.addUser).toHaveBeenCalledWith(userCall);
+    });
+
+    it('creates the account confirmation', async () => {
+      await controller.register(dto);
+  
+      expect(userService.createConfirmation).toHaveBeenCalledWith(createdUser);
     });
 
     it('errors 409 if user already confirmed', async () => {
