@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserModel } from './models/user.model';
+import { UserConfirmationModel } from './models/user-confirmation.model';
 
 describe('UserService', () => {
   let service: UserService;
@@ -12,6 +13,7 @@ describe('UserService', () => {
         providers: [
           // blank because we're just testing non-repo things
           { provide: getRepositoryToken(UserModel), useValue: {} },
+          { provide: getRepositoryToken(UserConfirmationModel), useValue: {} },
           UserService,
         ],
       })

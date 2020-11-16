@@ -11,7 +11,7 @@ const models = TypeOrmModule.forFeature([
 
 @Module({
   imports: [ models ],
-  exports: [ models ],
+  exports: [ models, OrganizationService ],
   providers: [ OrganizationService ],
 })
 export class OrganizationModule {}
