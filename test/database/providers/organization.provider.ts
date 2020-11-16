@@ -38,6 +38,8 @@ export class OrganizationProvider extends DatabaseProvider<OrganizationModel> {
   }
 
   public async delete(arg: Erasure<OrganizationModel>): Promise<void> {
-    await this.repo.delete(arg);
+    await this.repo.createQueryBuilder()
+      .where(arg)
+      .delete();
   }
 }

@@ -26,11 +26,9 @@ export class Database {
         throw new Error('Provider was given that was not a class');
       }
 
-      console.log('Initializing provider: ' + name);
       this.providers.set(name, new provider(this))
 
       const models: Model[] | undefined = Reflect.get(provider, '__models');
-      console.log(`Models for ${name}: `, models);
 
       if (!models || !models.length) continue;
       this.models.add(models);

@@ -18,7 +18,6 @@ export class OrganizationService {
    */
   public async create(arg: CreateOrganization, creatorId: string): Promise<OrganizationModel> {
     const creation = await this.orgRepo.create({ ... arg, creatorId });
-    console.log(creation);
     await this.orgRepo.createQueryBuilder()
       .insert()
       .values(creation)

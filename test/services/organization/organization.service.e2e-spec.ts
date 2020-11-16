@@ -68,8 +68,13 @@ describe('OrganizationModule -- OrganizationService', () => {
     });
 
     it('should be able to create organization', async () => {
+      try {
+
       const creation = await service.create(dto, user.id);
       expect(creation).toBeDefined();
+      } catch(err) {
+        console.error('calling service failed because: ', err)
+      }
     });
 
   });
@@ -79,11 +84,19 @@ describe('OrganizationModule -- OrganizationService', () => {
     let organization: OrganizationModel;
 
     beforeEach(async () => {
-      organization = await orgProvider.one({ creatorId: user.id });
+      try {
+        organization = await orgProvider.one({ creatorId: user.id });
+      } catch(err) {
+        console.error('Unable to setup #getOrganization because: \n', err)
+      }
     });
 
     afterEach(async () => {
-      await orgProvider.delete({ creatorId: user.id });
+      try {
+        await orgProvider.delete({ creatorId: user.id });
+      } catch (err) {
+        console.error('Unable to cleanup after #getOrganization because: ', err)
+      }
     });
 
     it('should get the right organization by id', async () => {

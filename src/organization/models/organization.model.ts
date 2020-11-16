@@ -13,6 +13,6 @@ export class OrganizationModel {
   public creatorId: string;
 
   @OneToOne(() => UserModel)
-  @JoinColumn()
+  @JoinColumn({ name: 'creator_id', referencedColumnName: 'id' })
   public creator: UserModel;
 }
