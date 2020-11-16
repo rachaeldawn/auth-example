@@ -1,23 +1,24 @@
-import Knex from 'knex';
-
-import * as database from '@test/utilities/database';
-
 import { TestingModule, Test } from '@nestjs/testing';
 import { AppModule } from '@app/app.module';
 import { UserService } from '@app/user/user.service';
 import { setupDefaultApp } from '@app/app';
 import { INestApplication } from '@nestjs/common';
-import { CreateUser } from '@app/user/types/create-user';
 import { UserModel } from '@app/user/user.model';
-import { plainToClass } from 'class-transformer';
+import { CreateUser } from '@app/user/types/create-user';
+import { Database } from '@test/database';
+import { UserProvider } from '@test/database/providers/user.provider';
 
 describe('UserModule -- UserService', () => {
   let app: INestApplication;
   let service: UserService;
-  let db: Knex;
+  let database: Database;
+  let userProvider: UserProvider;
 
   beforeAll(async () => {
-    db = database.getKnexClient();
+    database = new Database(UserProvider);
+    await database.connect('UserService E2E Tests');
+
+    userProvider = database.getProvider(UserProvider);
   });
 
   beforeEach(async () => {
@@ -37,8 +38,8 @@ describe('UserModule -- UserService', () => {
   });
 
   afterAll(async () => {
-    await db.destroy();
-  });
+    await database.destroy();
+  })
 
   describe('#createUser', () => {
     let dto: CreateUser;
@@ -50,10 +51,7 @@ describe('UserModule -- UserService', () => {
     });
 
     afterEach(async () => {
-      await db.queryBuilder()
-        .table('auth.users')
-        .where('email', dto.email)
-        .del();
+      await userProvider.delete({ email: dto.email });
     });
 
     it('should be able to create user', async () => {
@@ -63,46 +61,27 @@ describe('UserModule -- UserService', () => {
 
     it('should hash the password automatically', async () => {
       await service.createUser(dto);
-      const record = await database
-        .getTable('auth.users', db)
-        .where({ email: dto.email })
-        .select('*')
-        .first();
+      const record = await userProvider.repo
+        .createQueryBuilder('user')
+        .where('user.email = :email', { email: dto.email })
+        .getOne();
 
-      expect(record.password).not.toEqual(dto.password);
+      expect(record).toBeDefined();
+      expect(record?.password).not.toEqual(dto.password);
     });
   });
 
   describe('#getUser', () => {
-    // snake_case user
     let user: UserModel;
     let email: string;
 
     beforeEach(async () => {
       email = 'get_user@e2e_tests.example.com';
-
-      const created = await db.table('auth.users')
-        .insert({ email })
-        .returning('*')
-
-      const id = created[0].id;
-      const { created_at, updated_at, confirmed_at, ... data }= await db.table('auth.users')
-        .where({ id })
-        .select(
-          '*',
-          'created_at as createdAt',
-          'updated_at as updatedAt',
-          'confirmed_at as confirmedAt',
-        )
-        .first();
-
-      user = plainToClass(UserModel, data);
+      user = await userProvider.one({ email });
     });
 
     afterEach(async () => {
-      await db.table('auth.users')
-        .where({ email })
-        .del();
+      await userProvider.delete({ email })
     });
 
     it('should get the right user', async () => {

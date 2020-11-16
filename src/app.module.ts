@@ -4,6 +4,7 @@ import { UserModule } from './user/user.module';
 import { SharedModule } from './shared/shared.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from './shared/config.service';
+import { OrganizationModule } from './organization/organization.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ConfigService } from './shared/config.service';
     // Features
     AccountsModule,
     UserModule,
+    OrganizationModule,
   ],
 })
 export class AppModule {}

@@ -1,3 +1,5 @@
+require('reflect-metadata');
+
 const dotenv = require('dotenv');
 const { existsSync } = require('fs');
 
