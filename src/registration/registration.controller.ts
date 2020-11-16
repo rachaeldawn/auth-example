@@ -3,6 +3,7 @@ import { RegisterAccount } from './dto/register';
 import { OrganizationService } from '@app/organization/organization.service';
 import { UserService } from '@app/user/user.service';
 import { MessageResponse } from '@app/shared/responses/message';
+import { ConfirmDTO } from './dto/confirm';
 
 @Controller('register')
 export class RegistrationController {
@@ -11,6 +12,16 @@ export class RegistrationController {
     private readonly users: UserService,
     private readonly orgs: OrganizationService
   ) {}
+
+  @Post('confirm')
+  public async confirm(
+    @Body() { token }: ConfirmDTO
+  ): Promise<MessageResponse> {
+    await this.users.confirmRegistration(token);
+
+    // changing this in the future to be the JWT response
+    return new MessageResponse("Registration confirmed. Please log in");
+  }
 
   @Post()
   public async register(
@@ -32,4 +43,5 @@ export class RegistrationController {
     const msg = 'Registration successful, please check your email to continue';
     return new MessageResponse(msg)
   }
+
 }

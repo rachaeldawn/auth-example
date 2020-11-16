@@ -9,6 +9,7 @@ import { UserModel } from '@app/user/models/user.model';
 import { OrganizationModel } from '@app/organization/models/organization.model';
 import { MessageResponse } from '@app/shared/responses/message';
 import { ConflictException } from '@nestjs/common';
+import { ConfirmDTO } from './dto/confirm';
 
 describe('RegistrationController', () => {
   let controller: RegistrationController;
@@ -18,7 +19,13 @@ describe('RegistrationController', () => {
 
   beforeEach(async () => {
 
-    userService = createSpyObject(['createUser', 'getUser', 'createConfirmation']);
+    userService = createSpyObject([
+      'createUser',
+      'getUser',
+      'createConfirmation',
+      'confirmRegistration',
+    ]);
+
     orgService = createSpyObject(['create', 'addUser']);
 
     const module: TestingModule = await Test
@@ -110,4 +117,18 @@ describe('RegistrationController', () => {
       }
     });
   })
+
+  describe('#confirm', () => {
+    let call: ConfirmDTO;
+
+    beforeEach(() => {
+      call = new ConfirmDTO();
+      call.token = uuid().replace(/\W/g, '').slice(0, 32);
+    })
+
+    it('calls the confirm on the user service', async () => {
+      await controller.confirm(call);
+      expect(userService.confirmRegistration).toHaveBeenCalledWith(call.token);
+    });
+  });
 });
