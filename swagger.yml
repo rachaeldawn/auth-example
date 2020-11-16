@@ -82,3 +82,7 @@ components:
             A short-form, parseable error for SDKs to parse and respond to
           type: string
           example: 'Incorrect password length, minimum 8 chars.'
+        statusCode:
+          description: An HTTP error code
+          type: number
+          example: 400

@@ -36,7 +36,8 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.3",
-    "typeorm": "^0.2.29"
+    "typeorm": "^0.2.29",
+    "uuid": "^8.3.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.5.1",
@@ -48,6 +49,7 @@
     "@types/node": "^14.14.7",
     "@types/pg": "^7.14.6",
     "@types/supertest": "^2.0.10",
+    "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^4.6.1",
     "@typescript-eslint/parser": "^4.6.1",
     "eslint": "^7.12.1",
@@ -67,7 +69,7 @@
       "ts"
     ],
     "moduleNameMapper": {
-      "@app(.*)": "./dist"
+      "@app(.*)": "<rootDir>/../src$1.ts"
     },
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
