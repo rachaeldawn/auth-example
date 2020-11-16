@@ -39,7 +39,7 @@ describe('OrganizationModule -- OrganizationService', () => {
 
     service = moduleFixture.get(OrganizationService);
 
-    user = await userProvider.one({ email: 'organization_servicetests@e2e-tests.example.com' })
+    user = await userProvider.createOne({ email: 'organization_servicetests@e2e-tests.example.com' })
   });
 
   afterEach(async () => {
@@ -48,7 +48,7 @@ describe('OrganizationModule -- OrganizationService', () => {
   });
 
   afterAll(async () => {
-    await db.destroy();
+    await db.disconnect();
   })
 
   describe('#create', () => {
@@ -80,7 +80,7 @@ describe('OrganizationModule -- OrganizationService', () => {
 
     beforeEach(async () => {
       try {
-        organization = await orgProvider.one({ creatorId: user.id });
+        organization = await orgProvider.createOne({ creatorId: user.id });
       } catch(err) {
         console.error('Unable to setup #getOrganization because: \n', err)
       }

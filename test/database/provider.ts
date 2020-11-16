@@ -13,9 +13,12 @@ export abstract class DatabaseProvider<T> {
 
   constructor(protected db: Database) { }
 
-  public abstract async one(... args: any[]): Promise<T>;
-  public abstract async many(... args: any[]): Promise<T[]>;
-  public abstract async delete(arg: Erasure<T>): Promise<void>;
+  public abstract async createOne(... args: any[]): Promise<T>;
+  public abstract async createMany(... args: any[]): Promise<T[]>;
+
+  public async delete(arg: Erasure<T>): Promise<void> {
+    await this.repo.delete(arg);
+  };
 }
 
 export function ProvideModels(... arg: Model[]) {

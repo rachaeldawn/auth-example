@@ -38,7 +38,7 @@ describe('UserModule -- UserService', () => {
   });
 
   afterAll(async () => {
-    await database.destroy();
+    await database.disconnect();
   })
 
   describe('#createUser', () => {
@@ -77,7 +77,7 @@ describe('UserModule -- UserService', () => {
 
     beforeEach(async () => {
       email = 'get_user@e2e_tests.example.com';
-      user = await userProvider.one({ email });
+      user = await userProvider.createOne({ email });
     });
 
     afterEach(async () => {

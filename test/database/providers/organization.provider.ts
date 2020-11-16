@@ -1,7 +1,6 @@
 import { DatabaseProvider, ProvideModels } from '../provider';
 import { OrganizationModel } from '@app/organization/models/organization.model';
 import { Repository } from 'typeorm';
-import { Erasure } from '../types';
 
 export interface IOneOrganization {
   name?: string;
@@ -15,7 +14,7 @@ export class OrganizationProvider extends DatabaseProvider<OrganizationModel> {
     return this.db.repo(OrganizationModel);
   }
 
-  public async one({ name, creatorId }: IOneOrganization): Promise<OrganizationModel> {
+  public async createOne({ name, creatorId }: IOneOrganization): Promise<OrganizationModel> {
     const created = this.repo.create({ name: name ?? '', creatorId });
     await this.repo.createQueryBuilder()
       .insert()
@@ -26,7 +25,7 @@ export class OrganizationProvider extends DatabaseProvider<OrganizationModel> {
     return created;
   }
 
-  public async many(...args: IOneOrganization[]): Promise<OrganizationModel[]> {
+  public async createMany(...args: IOneOrganization[]): Promise<OrganizationModel[]> {
     const created = this.repo.create(args);
     await this.repo.createQueryBuilder()
       .insert()
@@ -35,11 +34,5 @@ export class OrganizationProvider extends DatabaseProvider<OrganizationModel> {
       .execute();
 
     return created;
-  }
-
-  public async delete(arg: Erasure<OrganizationModel>): Promise<void> {
-    await this.repo.createQueryBuilder()
-      .where(arg)
-      .delete();
   }
 }
