@@ -21,12 +21,13 @@ describe('RegistrationController', () => {
 
     userService = createSpyObject([
       'createUser',
+      'updateUser',
       'getUser',
       'createConfirmation',
       'confirmRegistration',
     ]);
 
-    orgService = createSpyObject(['create', 'addUser']);
+    orgService = createSpyObject(['create', 'get', 'addUser', 'updateName']);
 
     const module: TestingModule = await Test
       .createTestingModule({
@@ -103,6 +104,28 @@ describe('RegistrationController', () => {
       await controller.register(dto);
   
       expect(userService.createConfirmation).toHaveBeenCalledWith(createdUser);
+    });
+
+    it('updates instead of creating if not confirmed but does exist', async () => {
+      const { organization, ... upd }: any = dto;
+      dto.organization = 'Yeeeeet';
+      userService.getUser.mockResolvedValue(createdUser);
+      orgService.get.mockResolvedValue(createdOrg);
+
+      await controller.register(dto);
+      expect(userService.updateUser).toHaveBeenCalledWith(createdUser, upd);
+      expect(orgService.updateName).toHaveBeenCalledWith(createdOrg, dto.organization);
+    });
+
+    it('creates a new org if user exists, not confirmed, and no org', async () => {
+      const { organization, ... upd }: any = dto;
+      dto.organization = 'Yeeeeet';
+      userService.getUser.mockResolvedValue(createdUser);
+      orgService.get.mockResolvedValue(void 0);
+
+      await controller.register(dto);
+      expect(userService.updateUser).toHaveBeenCalledWith(createdUser, upd);
+      expect(orgService.create).toHaveBeenCalledWith({ name: dto.organization }, createdUser.id);
     });
 
     it('errors 409 if user already confirmed', async () => {

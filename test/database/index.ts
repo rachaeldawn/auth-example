@@ -35,7 +35,7 @@ export class Database {
       type: 'postgres',
       url,
       entities: this.models.entities,
-      name: name ?? `${Date.now()}-E2E-Connection`
+      name: name ?? `${Date.now()}-E2E-Connection`,
     });
   }
 

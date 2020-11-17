@@ -2,7 +2,13 @@ import bcrypt from 'bcrypt';
 
 import * as constants from './user.constants';
 
-import { Injectable, NotFoundException, InternalServerErrorException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+  ConflictException,
+} from '@nestjs/common';
+
 import { CreateUser } from './types/create-user';
 import { UserModel } from './models/user.model';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -90,5 +96,20 @@ export class UserService {
     if (!!email) find.email = email;
 
     return this.userRepo.findOne(find);
+  }
+
+  /**
+   * Take a VALIDATED update object, and apply each key to a UserModel entity,
+   * returning the reloaded result
+   */
+  public async updateUser(user: UserModel, upd: Partial<UserModel>) {
+    const updkeys = Object.keys(upd);
+    const keys = Object.keys(user).filter(a => updkeys.includes(a));
+  
+    for (const key of keys) {
+      (user as any)[key] = (upd as any)[key];
+    }
+
+    return this.userRepo.save(user, { reload: true });
   }
 }

@@ -38,8 +38,8 @@ describe('OrganizationModule -- OrganizationService', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
-    app.init();
     setupDefaultApp(app);
+    await app.init();
 
     service = moduleFixture.get(OrganizationService);
 

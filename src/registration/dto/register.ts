@@ -10,18 +10,23 @@ export class RegisterAccount {
   @IsString()
   @MinLength(8)
   @MaxLength(128)
+  @Expose()
   public password: string;
 
   @IsString()
   @IsOptional()
+  @Expose()
   public name?: string;
 
   @IsNumber()
   @Min(12)
   @Max(140)
+  @IsOptional()
+  @Expose()
   public age?: number;
 
   @IsString()
   @IsOptional()
+  @Expose()
   public organization?: string;
 }

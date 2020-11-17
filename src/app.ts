@@ -14,6 +14,7 @@ function defaultValidationPipe() {
 export function setupDefaultApp(app: INestApplication) {
   app.use(helmet());
   app.useGlobalPipes(defaultValidationPipe());
+  app.enableShutdownHooks();
   app.enableCors({ origin: '*', preflightContinue: false });
 }
 

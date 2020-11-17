@@ -1,1 +1,1 @@
-export const defaultPassword: string = 'Password1234!'
+export const defaultPassword: string = 'Password1234!';
