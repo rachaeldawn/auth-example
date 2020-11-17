@@ -58,4 +58,10 @@ export class OrganizationService {
   public async get(arg: IGetOrganization): Promise<OrganizationModel | undefined> {
     return this.orgRepo.findOne(arg);
   }
+
+  public async updateName(org: OrganizationModel, name: string): Promise<OrganizationModel> {
+    org.name = name;
+
+    return this.orgRepo.save(org, { reload: true });
+  }
 }

@@ -6,13 +6,13 @@ export class CreateUser {
 
   @Expose()
   @IsEmail()
-  email: string;
+  public email: string;
 
   @Expose()
   @IsString()
   @MinLength(8)
   @MaxLength(128)
-  password: string;
+  public password: string;
 
 
   @Expose()

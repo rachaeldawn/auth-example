@@ -4,6 +4,7 @@ export const UserTable = 'auth.users';
 
 @Entity({ name: 'users', schema: 'auth' })
 export class UserModel {
+
   @PrimaryGeneratedColumn('uuid')
   public id: string;
 
