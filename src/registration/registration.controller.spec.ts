@@ -139,7 +139,7 @@ describe('RegistrationController', () => {
         expect(err).toBeInstanceOf(ConflictException);
       }
     });
-  })
+  });
 
   describe('#confirm', () => {
     let call: ConfirmDTO;
