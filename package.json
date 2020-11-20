@@ -12,6 +12,9 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "gen:keys": "npm run gen:keys:private && npm run gen:keys:public",
+    "gen:keys:private": "rm -rf keys && mkdir keys && openssl genpkey -algorithm RSA -out ./keys/rsa_private.pem -pkeyopt rsa_keygen_bits:2048",
+    "gen:keys:public": "openssl rsa -in ./keys/rsa_private.pem -pubout -out ./keys/rsa_public.pem",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -31,6 +34,7 @@
     "class-validator": "^0.12.2",
     "dotenv": "^8.2.0",
     "helmet": "^4.2.0",
+    "jose": "^3.0.2",
     "module-alias": "^2.2.2",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.32",
@@ -71,7 +75,8 @@
       "ts"
     ],
     "moduleNameMapper": {
-      "@app(.*)": "<rootDir>/../src$1.ts"
+      "@app(.*)": "<rootDir>/../src$1.ts",
+      "jose(.*)": "<rootDir>/../node_modules/jose/dist/node/cjs/$1.js"
     },
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",

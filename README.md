@@ -45,4 +45,9 @@ $ npm run test:cov
 
 ## Code Samples
 
-
+## Auth Keys
+If you are just looking to run locally, you can run `npm run gen:keys` to generate a public/private key pair for signing auth tokens.
+If you are looking to use your own keys, provide `AUTH_KEY_ALGO=algorithm`, `AUTH_PUBLIC_KEY=path` and `AUTH_PRIVATE_KEY=path`
+  where `AUTH_KEY_ALGO` is one of [these](https://tools.ietf.org/html/rfc7518#section-3.1)
+  where `AUTH_PUBLIC_KEY` is a path to the public key file
+  where `AUTH_PRIVATE_KEY` is a path to the private key file
