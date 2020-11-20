@@ -2,8 +2,7 @@ import jwtSign from 'jose/jwt/sign';
 import jwtVerify from 'jose/jwt/verify';
 import Moment from 'moment';
 
-import { Injectable, Inject } from '@nestjs/common';
-import { UserModel } from '@app/user/models/user.model';
+import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { KeyObject } from 'crypto';
 import { OrganizationUserModel } from '@app/organization/models/organization-user.model';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -36,14 +35,15 @@ export class AuthService {
     this.algo = this.conf.get('AUTH_KEY_ALGO') || 'RS256';
   }
 
+
   /**
    * Create an access token that the user is able to use to access the API
    */
-  public async createAccess(user: UserModel): Promise<string> {
+  public async createAccess(userId: string): Promise<string> {
     // pull org user models
     const orgs = await this.seatRepo
       .createQueryBuilder('link')
-      .where('link.userId = :userid', { userid: user.id })
+      .where('link.userId = :userId', { userId })
       .getMany();
 
     const aud = orgs.map(({ orgId, role }) => `${orgId}:${role}`);
@@ -52,7 +52,7 @@ export class AuthService {
       .setAudience(aud)
       .setExpirationTime('15m')
       .setProtectedHeader({ alg: this.algo })
-      .setSubject(user.id)
+      .setSubject(userId)
       .setIssuedAt()
       .setIssuer('auth-example')
       .sign(this.privateKey);
@@ -63,10 +63,10 @@ export class AuthService {
    * session beyond the 15 minutes of the access token. These only work one 
    * time.
    */
-  public async createRefresh(user: UserModel): Promise<string> {
+  public async createRefresh(userId: string): Promise<string> {
     const record = this.refreshRepo.create({
       expiresAt: Moment().add(2, 'weeks').toDate(),
-      userId: user.id,
+      userId,
     });
 
     await this.refreshRepo.createQueryBuilder()
@@ -76,14 +76,23 @@ export class AuthService {
       .execute();
 
     return new jwtSign({})
-      .setAudience(`refresh:${user.id}`)
+      .setAudience(`refresh:${userId}`)
       .setExpirationTime('2w')
       .setProtectedHeader({ alg: this.algo })
-      .setSubject(user.id)
+      .setSubject(userId)
       .setIssuedAt()
       .setIssuer('auth-example')
       .setJti(record.id)
       .sign(this.privateKey);
+  }
+
+  /**
+   * Validates a refresh token is valid, then generates a new 
+   */
+  public async refreshToken(token: string): Promise<string> {
+    const { payload }: JWTVerifyResult = await this.validateRefresh(token);
+    await this.consumeRefresh(payload.jti as string);
+    return this.createRefresh(payload.sub as string);
   }
 
   /**
@@ -96,5 +105,15 @@ export class AuthService {
 
   public async validateRefresh(token: string): Promise<JWTVerifyResult> {
     return jwtVerify(token, this.publicKey, { issuer: 'auth-example' });
+  }
+
+  private async consumeRefresh(id: string): Promise<void> {
+    const existing = await this.refreshRepo.findOne(id);
+    if (existing == null || existing.usedAt != null) {
+      throw new UnauthorizedException('Refresh token already consumed');
+    }
+
+    existing.usedAt = new Date();
+    await this.refreshRepo.save(existing);
   }
 }

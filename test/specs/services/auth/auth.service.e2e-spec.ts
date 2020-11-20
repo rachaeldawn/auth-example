@@ -5,7 +5,7 @@ import jwtVerify from 'jose/jwt/verify';
 import { TestingModule, Test } from '@nestjs/testing';
 import { AppModule } from '@app/app.module';
 import { setupDefaultApp } from '@app/app';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, UnauthorizedException } from '@nestjs/common';
 import { Database } from '@test/database';
 import { KeyObject } from 'crypto';
 import { PRIVATE_KEY, PUBLIC_KEY } from '@app/auth/auth.constants';
@@ -121,7 +121,7 @@ describe(`${moduleName}Module -- ${serviceName}Service`, () => {
   describe('#createAccess', () => {
     // if this does not error, it passes because it works
     it('creates a token with access to the user\'s org', async () => {
-      const token = await service.createAccess(user);
+      const token = await service.createAccess(user.id);
       await jwtVerify(token, keys.pub, {
         issuer: 'auth-example',
         audience: [ `${org.id}:owner` ],
@@ -130,7 +130,7 @@ describe(`${moduleName}Module -- ${serviceName}Service`, () => {
     });
 
     it('has a 15 minute expiration', async () => {
-      const token = await service.createAccess(user);
+      const token = await service.createAccess(user.id);
       const { payload }: JWTVerifyResult = await jwtVerify(token, keys.pub, {
         issuer: 'auth-example',
         audience: [ `${org.id}:owner` ],
@@ -156,7 +156,7 @@ describe(`${moduleName}Module -- ${serviceName}Service`, () => {
     let token: string;
 
     beforeEach(async () => {
-      token = await service.createAccess(user);
+      token = await service.createAccess(user.id);
     });
 
     it('validates a proper token', async () => {
@@ -169,7 +169,7 @@ describe(`${moduleName}Module -- ${serviceName}Service`, () => {
 
   describe('#createRefresh', () => {
     it('inserts the refresh tokens into the db', async () => {
-      const token = await service.createRefresh(user);
+      const token = await service.createRefresh(user.id);
       const unwrapped = await jwtVerify(token, keys.pub, {
         audience: `refresh:${user.id}`,
         subject: user.id,
@@ -184,7 +184,7 @@ describe(`${moduleName}Module -- ${serviceName}Service`, () => {
     });
 
     it('has a 2 week minute expiration', async () => {
-      const token = await service.createRefresh(user);
+      const token = await service.createRefresh(user.id);
       const { payload }: JWTVerifyResult = await jwtVerify(token, keys.pub, {
         audience: `refresh:${user.id}`,
         subject: user.id,
@@ -205,16 +205,53 @@ describe(`${moduleName}Module -- ${serviceName}Service`, () => {
 
   });
 
+  describe('#refreshToken', () => {
+    let token: string;
+    beforeEach(async () => {
+      token = await service.createRefresh(user.id);
+    });
+
+    it('sets the usedAt field', async () => {
+      await service.refreshToken(token);
+      const now = Date.now();
+      const record = await refreshProvider.repo.findOne({ userId: user.id });
+      expect(record).toBeDefined();
+      expect(record?.usedAt?.getTime()).toBeGreaterThan(now - 10_000);
+      expect(record?.usedAt?.getTime()).toBeLessThan(now + 10_000);
+    });
+
+    it('returns a new refresh token', async () => {
+      const newToken = await service.refreshToken(token);
+      // if errors, does not work
+      await service.validateAccess(newToken);
+    });
+
+    it('errors if usedAt already set', async () => {
+      const refresh = await refreshProvider.repo.findOne({ where: { userId: user.id } });
+      if (refresh == null) {
+        throw new Error('refresh token was not created in test setup');
+      }
+
+      refresh.usedAt = new Date();
+      await refreshProvider.repo.save(refresh);
+
+      try {
+        await service.refreshToken(token);
+      } catch (err) {
+        expect(err).toBeInstanceOf(UnauthorizedException);
+      }
+    });
+  });
+
   describe('#validateRefresh', () => {
     let token: string;
 
     beforeEach(async () => {
-      token = await service.createRefresh(user);
+      token = await service.createRefresh(user.id);
     });
 
     it('validates a proper token', async () => {
       const { payload }: JWTVerifyResult = await service.validateRefresh(token);
-      expect(payload.nbf)
       expect(payload.aud).toEqual(`refresh:${user.id}`);
       expect(payload.sub).toEqual(user.id);
     });
