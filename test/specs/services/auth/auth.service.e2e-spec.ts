@@ -1,5 +1,5 @@
 import crypto from 'crypto'
-
+import Moment from 'moment';
 import jwtVerify from 'jose/jwt/verify';
 
 import { TestingModule, Test } from '@nestjs/testing';
@@ -16,6 +16,7 @@ import { OrganizationProvider } from '@test/database/providers/organization.prov
 import { OrganizationUserProvider } from '@test/database/providers/organization-user.provider';
 import { AuthService } from '@app/auth/auth.service';
 import { RefreshTokenProvider } from '@test/database/providers/refresh-token.provider';
+import { JWTVerifyResult } from 'jose/webcrypto/types';
 
 const moduleName = 'Auth'
 const serviceName = 'Auth'
@@ -127,6 +128,26 @@ describe(`${moduleName}Module -- ${serviceName}Service`, () => {
         subject: user.id,
       });
     });
+
+    it('has a 15 minute expiration', async () => {
+      const token = await service.createAccess(user);
+      const { payload }: JWTVerifyResult = await jwtVerify(token, keys.pub, {
+        issuer: 'auth-example',
+        audience: [ `${org.id}:owner` ],
+        subject: user.id,
+      });
+
+      // verify 15 minute expiry
+      const refNow = Date.now();
+      const refThen = Moment().add(15, 'minutes').toDate().getTime();
+      const ref = Math.round((refThen - refNow) / 1000);
+      const iat = payload.iat ?? 0;
+      const exp = payload.exp ?? 0;
+      const diff = exp - iat;
+
+      expect(diff).toBeGreaterThan(ref - 10);
+      expect(diff).toBeLessThan(ref + 10);
+    });
   });
 
 
@@ -139,8 +160,10 @@ describe(`${moduleName}Module -- ${serviceName}Service`, () => {
     });
 
     it('validates a proper token', async () => {
-      const retrieved = await service.validateAccess(token);
-      expect(retrieved).toEqual(user);
+      const { payload }: JWTVerifyResult = await service.validateAccess(token);
+      expect(payload.nbf)
+      expect(payload.aud).toEqual([`${org.id}:owner`]);
+      expect(payload.sub).toEqual(user.id);
     });
   });
 
@@ -160,5 +183,40 @@ describe(`${moduleName}Module -- ${serviceName}Service`, () => {
       expect(record).toBeTruthy()
     });
 
+    it('has a 2 week minute expiration', async () => {
+      const token = await service.createRefresh(user);
+      const { payload }: JWTVerifyResult = await jwtVerify(token, keys.pub, {
+        audience: `refresh:${user.id}`,
+        subject: user.id,
+        issuer: 'auth-example',
+      });
+
+      // verify 2 week expiry
+      const refNow = Date.now();
+      const refThen = Moment().add(2, 'weeks').toDate().getTime();
+      const ref = Math.round((refThen - refNow) / 1000);
+      const iat = payload.iat ?? 0;
+      const exp = payload.exp ?? 0;
+      const diff = exp - iat;
+
+      expect(diff).toBeGreaterThan(ref - 10);
+      expect(diff).toBeLessThan(ref + 10);
+    });
+
+  });
+
+  describe('#validateRefresh', () => {
+    let token: string;
+
+    beforeEach(async () => {
+      token = await service.createRefresh(user);
+    });
+
+    it('validates a proper token', async () => {
+      const { payload }: JWTVerifyResult = await service.validateRefresh(token);
+      expect(payload.nbf)
+      expect(payload.aud).toEqual(`refresh:${user.id}`);
+      expect(payload.sub).toEqual(user.id);
+    });
   });
 });

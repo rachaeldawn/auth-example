@@ -2,7 +2,7 @@ import jwtSign from 'jose/jwt/sign';
 import jwtVerify from 'jose/jwt/verify';
 import Moment from 'moment';
 
-import { Injectable, NotImplementedException, Inject, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { UserModel } from '@app/user/models/user.model';
 import { KeyObject } from 'crypto';
 import { OrganizationUserModel } from '@app/organization/models/organization-user.model';
@@ -11,7 +11,7 @@ import { Repository } from 'typeorm';
 import { PRIVATE_KEY, PUBLIC_KEY } from './auth.constants';
 import { ConfigService } from '@app/shared/config.service';
 import { RefreshTokenModel } from './models/refresh-token.model';
-import { UserService } from '@app/user/user.service';
+import { JWTVerifyResult } from 'jose/webcrypto/types';
 
 @Injectable()
 export class AuthService {
@@ -30,8 +30,6 @@ export class AuthService {
 
     @InjectRepository(RefreshTokenModel)
     private readonly refreshRepo: Repository<RefreshTokenModel>,
-
-    private readonly user: UserService,
 
     private readonly conf: ConfigService
   ) {
@@ -67,7 +65,7 @@ export class AuthService {
    */
   public async createRefresh(user: UserModel): Promise<string> {
     const record = this.refreshRepo.create({
-      expiresAt: Moment().add(24, 'hours').toDate(),
+      expiresAt: Moment().add(2, 'weeks').toDate(),
       userId: user.id,
     });
 
@@ -79,7 +77,7 @@ export class AuthService {
 
     return new jwtSign({})
       .setAudience(`refresh:${user.id}`)
-      .setExpirationTime('24h')
+      .setExpirationTime('2w')
       .setProtectedHeader({ alg: this.algo })
       .setSubject(user.id)
       .setIssuedAt()
@@ -89,26 +87,14 @@ export class AuthService {
   }
 
   /**
-   * Refresh an auth token, erroring if it has passed its expiration
-   */
-  public async refreshToken(existing: string): Promise<string> {
-    throw new NotImplementedException();
-  }
-
-  /**
    * Validate an accesss token, returning the user to which it belongs,
    * or error because it is invalid
    */
-  public async validateAccess(token: string): Promise<UserModel> {
-    const unwrapped = await jwtVerify(token, this.publicKey, { issuer: 'auth-example' });
-
-    const userId = unwrapped.payload.sub as string;
-    const user = await this.user.getUser({ id: userId });
-    if (user == null) {
-      throw new InternalServerErrorException('Could not find user despite valid signing token');
-    }
-
-    return user;
+  public async validateAccess(token: string): Promise<JWTVerifyResult> {
+    return jwtVerify(token, this.publicKey, { issuer: 'auth-example' });
   }
 
+  public async validateRefresh(token: string): Promise<JWTVerifyResult> {
+    return jwtVerify(token, this.publicKey, { issuer: 'auth-example' });
+  }
 }
